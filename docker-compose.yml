@@ -1,0 +1,40 @@
+version: '3'
+services:
+  mlflow:
+    # Use the Dockerfile in the current directory to build the image
+    build: .
+    # Map the container's port 4444 to the host's port 4444
+    ports:
+      - "5555:5000"
+    # Set environment variables for the MLflow server
+    environment:
+      - MLFLOW_BACKEND_STORE_URI=postgresql://${DB_USER}:${DB_PASSWORD}@db:${DB_PORT}/${DB_NAME}
+      - MLFLOW_DEFAULT_ARTIFACT_ROOT=/mlflow
+    # Mount a volume to persist the MLflow data
+    volumes:
+      - ./mlflow:/mlflow
+    # Make sure the mlflow container waits for the db container to be up
+    depends_on:
+      - db
+    # Attach to the user-defined bridge network
+    networks:
+      - mlflow_network
+
+  db:
+    # Use the official PostgreSQL Docker image
+    image: postgres:latest
+    # Set the environment variables for the PostgreSQL database
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    # Mount a volume to persist the PostgreSQL data in the current directory
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data
+    # Attach to the user-defined bridge network
+    networks:
+      - mlflow_network
+
+# Define the user-defined bridge network
+networks:
+  mlflow_network:
