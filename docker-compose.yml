@@ -1,6 +1,7 @@
 version: '3'
 services:
   mlflow:
+    user: 1000:1000
     # Use the Dockerfile in the current directory to build the image
     build: .
     # Map the container's port 4444 to the host's port 4444
@@ -21,6 +22,7 @@ services:
       - mlflow_network
 
   db:
+    user: 1000:1000
     # Use the official PostgreSQL Docker image
     image: postgres:latest
     # Set the environment variables for the PostgreSQL database
